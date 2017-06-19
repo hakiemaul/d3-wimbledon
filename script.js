@@ -45,7 +45,7 @@ let redraw = (data) => {
     .attr('fill', colorScale)
     .attr('class', 'bar')
     .attr('x', (d, i) => {
-      return i * barWidth + marginLeft
+      return i * barWidth + marginLeft - 10
     })
     .attr('y', (d) => {
       return height - yScale(d) - margin
@@ -57,11 +57,11 @@ let redraw = (data) => {
 
   svg.append('g')
     .attr('class', 'axisSteelBlue')
-    .attr('transform', `translate(${marginLeft})`)
+    .attr('transform', `translate(${marginLeft - 10})`)
     .call(d3.axisLeft(yAxis).ticks(d3.max(data)))
   svg.append('g')
     .attr('class', 'axisSteelBlue')
-    .attr('transform', `translate(${marginLeft}, ${height - margin})`)
+    .attr('transform', `translate(${marginLeft - 10}, ${height - margin})`)
     .call(d3.axisBottom(xAxis).ticks(data.length))
 }
 
