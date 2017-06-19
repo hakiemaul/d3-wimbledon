@@ -6,10 +6,13 @@ const width = 750,
   margin = 20
 marginLeft = 40
 
+var colorScale = d3.scaleLinear()
+  yScale = d3.scaleLinear()
+
 // Drawing area
 let svg = d3.select('#results')
   .append('svg')
-  .attr('width', width)
+  .attr('width', width + marginLeft)
   .attr('height', height)
 
 // Data reloading
@@ -17,33 +20,49 @@ let reload = () => {
   // Your data parsing here...
   let data = []
   d3.tsv("afcw-results.tsv", function (d) {
-    return d
-  }, function (error, data) {
-    let goal = data.map((d) => {
-      return d.GoalsScored
+    let goals = d.map(data => {
+      return data.GoalsScored
     })
-    svg.selectAll('rect')
-      .data(goal)
-      .enter()
-      .append('rect')
-      .attr('class', 'bar')
-      .attr('x', (d, i) => {
-        return i * 22
-      })
-      .attr('y', (d) => {
-        return height - (d * 100)
-      })
-      .attr('width', 20)
-      .attr('height', (d) => {
-        return d * 100
-      })
+    redraw(goals)
   })
 }
 
 // redraw function
 let redraw = (data) => {
-  // Your data to graph here
+  colorScale.domain([0, d3.max(data)]).range(['red', 'yellow'])
+  yScale.domain([0, d3.max(data)]).range([0, height - margin])
 
+  let yAxis = d3.scaleLinear().domain([0, d3.max(data)]).range([height - margin, 0])
+  let xAxis = d3.scaleLinear().domain([0, data.length]).range([0, width])
+
+  let barWidth = width/data.length
+
+  // Your data to graph here
+  svg.selectAll('rect')
+    .data(data)
+    .enter()
+    .append('rect')
+    .attr('fill', colorScale)
+    .attr('class', 'bar')
+    .attr('x', (d, i) => {
+      return i * barWidth + marginLeft
+    })
+    .attr('y', (d) => {
+      return height - yScale(d) - margin
+    })
+    .attr('width', barWidth - 2)
+    .attr('height', (d) => {
+      return yScale(d)
+    })
+
+  svg.append('g')
+    .attr('class', 'axisSteelBlue')
+    .attr('transform', `translate(${marginLeft})`)
+    .call(d3.axisLeft(yAxis).ticks(d3.max(data)))
+  svg.append('g')
+    .attr('class', 'axisSteelBlue')
+    .attr('transform', `translate(${marginLeft}, ${height - margin})`)
+    .call(d3.axisBottom(xAxis).ticks(data.length))
 }
 
 reload()
